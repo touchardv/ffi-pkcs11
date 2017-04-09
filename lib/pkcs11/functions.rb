@@ -7,18 +7,31 @@ module Pkcs11
 
   typedef :ulong, :CK_RV
 
-  CKR_OK = 0x00000000
-  CKR_CRYPTOKI_NOT_INITIALIZED = 0x00000190
-  CKR_CRYPTOKI_ALREADY_INITIALIZED = 0x00000191
+  CKF_RW_SESSION = 0x00000002
+  CKF_SERIAL_SESSION = 0x00000004
 
-  attach_function :C_Initialize, [:pointer], :CK_RV
-  attach_function :C_Finalize, [:pointer], :CK_RV
+  require 'pkcs11/return_value'
 
-  attach_function :C_OpenSession, [:ulong, :ulong, :pointer, :pointer, :pointer], :CK_RV
-  attach_function :C_CloseSession, [:pointer], :CK_RV
+  def self.import_function(function_name, *args)
+    function_symbol = "native_#{function_name}".to_sym
+    attach_function(function_symbol, function_name, *args)
 
-  attach_function :C_Login, [:pointer, :ulong, :pointer, :ulong], :CK_RV
-  attach_function :C_Logout, [:pointer], :CK_RV
+    self.class.send(:define_method, function_name) do |*arguments|
+      result = send(function_symbol, *arguments)
+      ReturnValue[result]
+    end
+  end
 
-  attach_function :C_Digest, [:pointer, :pointer, :ulong, :pointer, :pointer], :CK_RV
+  import_function :C_Initialize, [:pointer], :CK_RV
+  import_function :C_Finalize, [:pointer], :CK_RV
+
+  import_function :C_GetSlotList, [:bool, :pointer, :pointer], :CK_RV
+
+  import_function :C_OpenSession, [:ulong, :ulong, :pointer, :pointer, :pointer], :CK_RV
+  import_function :C_CloseSession, [:pointer], :CK_RV
+
+  import_function :C_Login, [:pointer, :ulong, :pointer, :ulong], :CK_RV
+  import_function :C_Logout, [:pointer], :CK_RV
+
+  import_function :C_Digest, [:pointer, :pointer, :ulong, :pointer, :pointer], :CK_RV
 end
