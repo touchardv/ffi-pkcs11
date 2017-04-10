@@ -6,8 +6,13 @@ describe Pkcs11::ReturnValue do
       expect(Pkcs11::ReturnValue[0]).to be_instance_of(Pkcs11::ReturnValue)
     end
 
+    it 'returns a ReturnValue instance (vendor defined)' do
+      return_value = Pkcs11::ReturnValue[0x80001234]
+      expect(return_value).to be_instance_of(Pkcs11::ReturnValue)
+    end
+
     it 'raises if the error code is unknown' do
-      expect { Pkcs11::ReturnValue[123456] }.to raise_error 'Unknown CKR result'
+      expect { Pkcs11::ReturnValue[123456] }.to raise_error 'Unknown CKR result: 123456'
     end
   end
 
@@ -35,6 +40,11 @@ describe Pkcs11::ReturnValue do
     it 'returns the CKR constant symbol' do
       expect(Pkcs11::CKR_OK.to_s).to eq 'CKR_OK'
       expect(Pkcs11::CKR_CRYPTOKI_ALREADY_INITIALIZED.to_s).to eq 'CKR_CRYPTOKI_ALREADY_INITIALIZED'
+    end
+
+    it 'returns the CKR_VENDOR_DEFINED with hexadecimal result' do
+      return_value = Pkcs11::ReturnValue[0x80001234]
+      expect(return_value.to_s).to eq 'CKR_VENDOR_DEFINED_0x80001234'
     end
   end
 end

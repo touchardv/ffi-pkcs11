@@ -5,8 +5,13 @@ module Pkcs11
     attr_reader :result
 
     def self.[](result)
-      raise 'Unknown CKR result' unless RETURN_VALUES.has_key? result
-      RETURN_VALUES[result]
+      if RETURN_VALUES.has_key? result
+        RETURN_VALUES[result]
+      elsif result >= CKR_VENDOR_DEFINED.result
+        ReturnValue.new(result, :CKR_VENDOR_DEFINED)
+      else
+        raise "Unknown CKR result: #{result}"
+      end
     end
 
     def ok?
@@ -18,7 +23,11 @@ module Pkcs11
     end
 
     def to_s
-      @symbol.to_s
+      if @symbol == :CKR_VENDOR_DEFINED
+        "#{@symbol}_#{sprintf('0x%x', @result)}"
+      else
+        @symbol.to_s
+      end
     end
 
     private
