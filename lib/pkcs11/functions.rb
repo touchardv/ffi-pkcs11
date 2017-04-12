@@ -28,7 +28,7 @@ module Pkcs11
   import_function :C_GetSlotList, [:bool, :pointer, :pointer], :CK_RV
 
   import_function :C_OpenSession, [:ulong, :ulong, :pointer, :pointer, :pointer], :CK_RV
-  import_function :C_CloseSession, [:pointer], :CK_RV
+  import_function :C_CloseSession, [:ulong], :CK_RV
 
   import_function :C_Login, [:pointer, :ulong, :pointer, :ulong], :CK_RV
   import_function :C_Logout, [:pointer], :CK_RV
