@@ -1,4 +1,5 @@
 require 'ffi'
+require 'pry'
 
 module Pkcs11
   extend FFI::Library
@@ -9,6 +10,10 @@ module Pkcs11
 
   CKF_RW_SESSION = 0x00000002
   CKF_SERIAL_SESSION = 0x00000004
+
+  CKU_SO = 0
+  CKU_USER = 1
+  CKU_CONTEXT_SPECIFIC = 2
 
   require 'pkcs11/return_value'
 
@@ -30,8 +35,8 @@ module Pkcs11
   import_function :C_OpenSession, [:ulong, :ulong, :pointer, :pointer, :pointer], :CK_RV
   import_function :C_CloseSession, [:ulong], :CK_RV
 
-  import_function :C_Login, [:pointer, :ulong, :pointer, :ulong], :CK_RV
-  import_function :C_Logout, [:pointer], :CK_RV
+  import_function :C_Login, [:ulong, :ulong, :string, :ulong], :CK_RV
+  import_function :C_Logout, [:ulong], :CK_RV
 
   import_function :C_Digest, [:pointer, :pointer, :ulong, :pointer, :pointer], :CK_RV
 end

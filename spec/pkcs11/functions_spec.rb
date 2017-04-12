@@ -4,11 +4,13 @@ describe Pkcs11 do
   before(:all) do
     # brew install softhsm
     `rm -rf /usr/local/var/lib/softhsm/tokens/*`
-    `softhsm2-util --init-token --slot 0 --id 0x00  --label 'zero' --pin 1234 --so-pin 1234`
+    `softhsm2-util --init-token --slot 0 --id 0x00  --label 'zero' --pin 1234 --so-pin 5678`
   end
 
   let(:session_handle_pointer) { FFI::MemoryPointer.new(:ulong) }
   let(:session_handle) { session_handle_pointer.read_ulong }
+  let(:pin) { '1234' }
+  let(:so_pin) { '5678' }
   
   after { Pkcs11.C_Finalize(nil) }
 
@@ -103,9 +105,28 @@ describe Pkcs11 do
     end
 
     describe '.C_CloseSession' do
-      it 'returns CKR_SESSION_HANDLE_pointer_INVALID' do
+      it 'returns CKR_SESSION_HANDLE_INVALID' do
         result = Pkcs11.C_CloseSession(0)
-        expect(result).to eq Pkcs11::CKR_SESSION_HANDLE_pointer_INVALID
+        expect(result).to eq Pkcs11::CKR_SESSION_HANDLE_INVALID
+      end
+    end
+
+    describe '.C_Login' do
+      it 'returns CKR_OK' do
+        result = Pkcs11.C_OpenSession(valid_slot,
+                                      Pkcs11::CKF_SERIAL_SESSION | Pkcs11::CKF_SERIAL_SESSION,
+                                      nil, nil, session_handle_pointer)
+        expect(result).to eq Pkcs11::CKR_OK
+
+        result = Pkcs11.C_Login(session_handle, Pkcs11::CKU_USER, pin, pin.size)        
+        expect(result).to eq Pkcs11::CKR_OK
+
+        result = Pkcs11::C_Logout(session_handle)
+        expect(result).to eq Pkcs11::CKR_OK
+      end
+
+      it 'returns CKR_PIN_INCORRECT' do
+        # TODO
       end
     end
   end
