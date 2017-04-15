@@ -9,12 +9,14 @@ describe Pkcs11 do
 
   let(:session_handle_pointer) { FFI::MemoryPointer.new(:ulong) }
   let(:session_handle) { session_handle_pointer.read_ulong }
+  let(:session_flags) { Pkcs11::CKF_RW_SESSION | Pkcs11::CKF_SERIAL_SESSION }
+  let(:invalid_pin) { '6666' }
   let(:pin) { '1234' }
   let(:so_pin) { '5678' }
-  
-  after { Pkcs11.C_Finalize(nil) }
 
   describe '.C_Initialize' do
+    after { Pkcs11.C_Finalize(nil) }
+
     it 'returns CKR_OK' do
       result = Pkcs11.C_Initialize(nil)
       expect(result).to eq Pkcs11::CKR_OK
@@ -88,7 +90,7 @@ describe Pkcs11 do
     describe '.C_OpenSession' do
       it 'returns CKR_OK' do
         result = Pkcs11.C_OpenSession(valid_slot,
-                                      Pkcs11::CKF_SERIAL_SESSION | Pkcs11::CKF_SERIAL_SESSION,
+                                      session_flags,
                                       nil, nil, session_handle_pointer)
         expect(result).to eq Pkcs11::CKR_OK
 
@@ -98,7 +100,7 @@ describe Pkcs11 do
 
       it 'returns CKR_SLOT_ID_INVALID' do
         result = Pkcs11.C_OpenSession(6666,
-                                      Pkcs11::CKF_SERIAL_SESSION | Pkcs11::CKF_SERIAL_SESSION,
+                                      session_flags,
                                       nil, nil, session_handle_pointer)
         expect(result).to eq Pkcs11::CKR_SLOT_ID_INVALID
       end
@@ -111,22 +113,39 @@ describe Pkcs11 do
       end
     end
 
-    describe '.C_Login' do
-      it 'returns CKR_OK' do
+    context 'In a session' do
+      before do
         result = Pkcs11.C_OpenSession(valid_slot,
-                                      Pkcs11::CKF_SERIAL_SESSION | Pkcs11::CKF_SERIAL_SESSION,
+                                      session_flags,
                                       nil, nil, session_handle_pointer)
-        expect(result).to eq Pkcs11::CKR_OK
-
-        result = Pkcs11.C_Login(session_handle, Pkcs11::CKU_USER, pin, pin.size)        
-        expect(result).to eq Pkcs11::CKR_OK
-
-        result = Pkcs11::C_Logout(session_handle)
         expect(result).to eq Pkcs11::CKR_OK
       end
 
-      it 'returns CKR_PIN_INCORRECT' do
-        # TODO
+      after do
+        result = Pkcs11.C_CloseSession(session_handle)
+        expect(result).to eq Pkcs11::CKR_OK
+      end
+
+      describe '.C_Login' do
+        it 'returns CKR_OK' do
+          result = Pkcs11.C_Login(session_handle, Pkcs11::CKU_USER, pin, pin.size)
+          expect(result).to eq Pkcs11::CKR_OK
+
+          result = Pkcs11::C_Logout(session_handle)
+          expect(result).to eq Pkcs11::CKR_OK
+        end
+
+        it 'returns CKR_PIN_INCORRECT' do
+          result = Pkcs11.C_Login(session_handle, Pkcs11::CKU_USER, invalid_pin, invalid_pin.size)
+          expect(result).to eq Pkcs11::CKR_PIN_INCORRECT
+        end
+      end
+
+      describe '.C_Logout' do
+        it 'returns CKR_USER_NOT_LOGGED_IN' do
+          result = Pkcs11::C_Logout(session_handle)
+          expect(result).to eq Pkcs11::CKR_OK
+        end
       end
     end
   end
