@@ -13,6 +13,7 @@ describe Pkcs11 do
   let(:invalid_pin) { '6666' }
   let(:pin) { '1234' }
   let(:so_pin) { '5678' }
+  let(:data) { 'ABCDEFGH' }
 
   describe '.C_Initialize' do
     after { Pkcs11.C_Finalize(nil) }
@@ -145,6 +146,25 @@ describe Pkcs11 do
         it 'returns CKR_USER_NOT_LOGGED_IN' do
           result = Pkcs11::C_Logout(session_handle)
           expect(result).to eq Pkcs11::CKR_OK
+        end
+      end
+
+      describe '.C_DigestInit' do
+        it 'returns CKR_OK' do
+          mechanism_pointer = FFI::MemoryPointer.new(:ulong)
+          mechanism_pointer.write_ulong(Pkcs11::CKM_MD5)
+          result = Pkcs11.C_DigestInit(session_handle, mechanism_pointer)
+          expect(result).to eq Pkcs11::CKR_OK
+        end
+      end
+
+      describe '.C_Digest' do
+        it 'returns CKR_OPERATION_NOT_INITIALIZED' do
+          digest = ' ' * 255
+          digest_length_pointer = FFI::MemoryPointer.new(:ulong)
+          digest_length_pointer.write_ulong(digest.size)
+          result = Pkcs11.C_Digest(session_handle, data, data.size, digest, digest_length_pointer)
+          expect(result).to eq Pkcs11::CKR_OPERATION_NOT_INITIALIZED
         end
       end
     end

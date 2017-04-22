@@ -11,6 +11,10 @@ module Pkcs11
   CKF_RW_SESSION = 0x00000002
   CKF_SERIAL_SESSION = 0x00000004
 
+  CKM_MD5 = 0x00000210
+  CKM_SHA_1 = 0x00000220
+  CKM_VENDOR_DEFINED = 0x80000000
+
   CKU_SO = 0
   CKU_USER = 1
   CKU_CONTEXT_SPECIFIC = 2
@@ -38,5 +42,6 @@ module Pkcs11
   import_function :C_Login, [:ulong, :ulong, :string, :ulong], :CK_RV
   import_function :C_Logout, [:ulong], :CK_RV
 
+  import_function :C_DigestInit, [:ulong, :pointer], :CK_RV
   import_function :C_Digest, [:ulong, :pointer, :ulong, :pointer, :pointer], :CK_RV
 end
