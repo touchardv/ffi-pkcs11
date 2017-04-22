@@ -38,5 +38,5 @@ module Pkcs11
   import_function :C_Login, [:ulong, :ulong, :string, :ulong], :CK_RV
   import_function :C_Logout, [:ulong], :CK_RV
 
-  import_function :C_Digest, [:pointer, :pointer, :ulong, :pointer, :pointer], :CK_RV
+  import_function :C_Digest, [:ulong, :pointer, :ulong, :pointer, :pointer], :CK_RV
 end
