@@ -1,5 +1,4 @@
 require 'ffi'
-require 'pry'
 
 module Pkcs11
   extend FFI::Library
@@ -18,8 +17,6 @@ module Pkcs11
   CKU_SO = 0
   CKU_USER = 1
   CKU_CONTEXT_SPECIFIC = 2
-
-  require 'pkcs11/return_value'
 
   def self.import_function(function_name, *args)
     function_symbol = "native_#{function_name}".to_sym
