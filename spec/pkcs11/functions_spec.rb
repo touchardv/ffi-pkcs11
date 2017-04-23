@@ -14,6 +14,7 @@ describe Pkcs11 do
   let(:pin) { '1234' }
   let(:so_pin) { '5678' }
   let(:data) { 'ABCDEFGH' }
+  let(:md5_data) { '4783e784b4fa2fba9e4d6502dbc64f8f' }
 
   describe '.C_Initialize' do
     after { Pkcs11.C_Finalize(nil) }
@@ -166,8 +167,29 @@ describe Pkcs11 do
           result = Pkcs11.C_Digest(session_handle, data, data.size, digest, digest_length_pointer)
           expect(result).to eq Pkcs11::CKR_OPERATION_NOT_INITIALIZED
         end
+
+        it 'returns CKR_OK' do
+          mechanism_pointer = FFI::MemoryPointer.new(:ulong)
+          mechanism_pointer.write_ulong(Pkcs11::CKM_MD5)
+          result = Pkcs11.C_DigestInit(session_handle, mechanism_pointer)
+          expect(result).to eq Pkcs11::CKR_OK
+
+          digest = FFI::MemoryPointer.new(:uchar, 255)
+          digest_length_pointer = FFI::MemoryPointer.new(:ulong)
+          digest_length_pointer.write_ulong(255)
+          result = Pkcs11.C_Digest(session_handle,
+                                   FFI::MemoryPointer.from_string(data), data.bytesize,
+                                   digest, digest_length_pointer)
+          expect(result).to eq Pkcs11::CKR_OK
+
+          digest_length = digest_length_pointer.read_ulong
+          expect(digest_length).to eq 16
+
+          bytes = digest.read_array_of_uchar(digest_length)
+          hexadecimal = bytes.collect {|b| sprintf('%02x', b)}.join ''
+          expect(hexadecimal).to eq md5_data
+        end
       end
     end
   end
 end
-
