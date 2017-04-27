@@ -128,6 +128,22 @@ describe Pkcs11 do
         expect(result).to eq Pkcs11::CKR_OK
       end
 
+      describe '.C_GetSessionInfo' do
+        let(:session_info) { Pkcs11::CK_SESSION_INFO.new }
+
+        it 'returns CKR_OK' do
+          result = Pkcs11::C_GetSessionInfo(session_handle, session_info)
+          expect(result).to eq Pkcs11::CKR_OK
+        end
+
+        it 'returns the session information' do
+          Pkcs11::C_GetSessionInfo(session_handle, session_info)
+          expect(session_info[:slot_id]).to eq valid_slot
+          expect(session_info[:flags]).to eq session_flags
+          expect(session_info[:state]).to eq Pkcs11::CKS_RW_PUBLIC_SESSION
+        end
+      end
+
       describe '.C_Login' do
         it 'returns CKR_OK' do
           result = Pkcs11.C_Login(session_handle, Pkcs11::CKU_USER, pin, pin.size)

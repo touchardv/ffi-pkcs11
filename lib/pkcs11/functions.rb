@@ -7,6 +7,19 @@ module Pkcs11
 
   typedef :ulong, :CK_RV
 
+  CKS_RO_PUBLIC_SESSION = 0
+  CKS_RO_USER_FUNCTIONS = 1
+  CKS_RW_PUBLIC_SESSION = 2
+  CKS_RW_USER_FUNCTIONS = 3
+  CKS_RW_SO_FUNCTIONS =  4
+
+  class CK_SESSION_INFO < FFI::Struct
+    layout :slot_id, :ulong,
+      :state, :ulong,
+      :flags, :ulong,
+      :u_device_error, :ulong
+  end
+
   CKF_RW_SESSION = 0x00000002
   CKF_SERIAL_SESSION = 0x00000004
 
@@ -33,6 +46,7 @@ module Pkcs11
 
   import_function :C_GetSlotList, [:bool, :pointer, :pointer], :CK_RV
 
+  import_function :C_GetSessionInfo, [:ulong, :pointer], :CK_RV
   import_function :C_OpenSession, [:ulong, :ulong, :pointer, :pointer, :pointer], :CK_RV
   import_function :C_CloseSession, [:ulong], :CK_RV
 
