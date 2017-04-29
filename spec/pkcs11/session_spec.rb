@@ -32,7 +32,7 @@ describe Pkcs11::Session do
 
   describe '#close' do
     it 'raises an error if not open' do
-      expect { session.close }.to raise_error RuntimeError
+      expect { session.close }.to raise_error Pkcs11::Error
     end
 
     it 'closes an open session' do

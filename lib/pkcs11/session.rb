@@ -7,7 +7,7 @@ module Pkcs11
 
     def close
       result = Pkcs11.C_CloseSession(session_handle)
-      raise unless result == Pkcs11::CKR_OK
+      check result
 
       @session_pointer.write_ulong(0)
     end
@@ -18,7 +18,7 @@ module Pkcs11
 
     def login(pin)
       result = Pkcs11.C_Login(session_handle, Pkcs11::CKU_USER, pin, pin.size)
-      raise unless result == Pkcs11::CKR_OK
+      check result
       if block_given?
         begin
           yield self
@@ -30,14 +30,14 @@ module Pkcs11
 
     def logout
       result = Pkcs11::C_Logout(session_handle)
-      raise unless result == Pkcs11::CKR_OK
+      check result
     end
 
     def open(slot, flags = default_flags)
       result = Pkcs11.C_OpenSession(slot,
                                     flags,
                                     nil, nil, @session_pointer)
-      raise unless result == Pkcs11::CKR_OK
+      check result
       if block_given?
         begin
           yield self
@@ -52,6 +52,10 @@ module Pkcs11
     end
 
     private
+
+    def check(result)
+      raise Pkcs11::Error.new(result.to_s) unless result == Pkcs11::CKR_OK
+    end
 
     def default_flags
       Pkcs11::CKF_RW_SESSION | Pkcs11::CKF_SERIAL_SESSION
