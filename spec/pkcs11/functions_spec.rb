@@ -15,6 +15,7 @@ describe Pkcs11 do
   let(:so_pin) { '5678' }
   let(:data) { 'ABCDEFGH' }
   let(:md5_data) { '4783e784b4fa2fba9e4d6502dbc64f8f' }
+  let(:object_handle_pointer) { FFI::MemoryPointer.new(:ulong) }
 
   describe '.C_Initialize' do
     after { Pkcs11.C_Finalize(nil) }
@@ -162,6 +163,41 @@ describe Pkcs11 do
       describe '.C_Logout' do
         it 'returns CKR_USER_NOT_LOGGED_IN' do
           result = Pkcs11::C_Logout(session_handle)
+          expect(result).to eq Pkcs11::CKR_USER_NOT_LOGGED_IN
+        end
+      end
+
+      describe '.C_FindObjectsInit' do
+        it 'returns CKR_OK' do
+          result = Pkcs11.C_FindObjectsInit(session_handle, nil, 0)
+          expect(result).to eq Pkcs11::CKR_OK
+
+          result = Pkcs11.C_FindObjectsFinal(session_handle)
+          expect(result).to eq Pkcs11::CKR_OK
+        end
+      end
+
+      describe '.C_FindObjectsFinal' do
+        it 'returns CKR_OPERATION_NOT_INITIALIZED' do
+          result = Pkcs11.C_FindObjectsFinal(session_handle)
+          expect(result).to eq Pkcs11::CKR_OPERATION_NOT_INITIALIZED
+        end
+      end
+
+      describe '.CFindObjects' do
+        before do
+          result = Pkcs11.C_FindObjectsInit(session_handle, nil, 0)
+          expect(result).to eq Pkcs11::CKR_OK
+        end
+
+        after do
+          result = Pkcs11.C_FindObjectsFinal(session_handle)
+          expect(result).to eq Pkcs11::CKR_OK
+        end
+
+        it 'returns CKR_OK' do
+          count_pointer = FFI::MemoryPointer.new(:ulong)
+          result = Pkcs11.C_FindObjects(session_handle, object_handle_pointer, 1, count_pointer)
           expect(result).to eq Pkcs11::CKR_OK
         end
       end

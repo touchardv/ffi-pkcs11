@@ -20,6 +20,19 @@ module Pkcs11
       :u_device_error, :ulong
   end
 
+  enum :CK_ATTRIBUTE_TYPE, [
+    :CKA_CLASS,  0x00000000,
+    :CKA_TOKEN,  0x00000001,
+    :CKA_PRIVATE,  0x00000002,
+    :CKA_LABEL,  0x00000003
+  ]
+
+  class CK_ATTRIBUTE < FFI::Struct
+    layout :type, :CK_ATTRIBUTE_TYPE,
+      :value, :pointer,
+      :value_len, :ulong
+  end
+
   CKF_RW_SESSION = 0x00000002
   CKF_SERIAL_SESSION = 0x00000004
 
@@ -52,6 +65,10 @@ module Pkcs11
 
   import_function :C_Login, [:ulong, :ulong, :string, :ulong], :CK_RV
   import_function :C_Logout, [:ulong], :CK_RV
+
+  import_function :C_FindObjectsInit, [:ulong, :pointer, :ulong], :CK_RV
+  import_function :C_FindObjects, [:ulong, :pointer, :ulong, :pointer], :CK_RV
+  import_function :C_FindObjectsFinal, [:ulong], :CK_RV
 
   import_function :C_DigestInit, [:ulong, :pointer], :CK_RV
   import_function :C_Digest, [:ulong, :pointer, :ulong, :pointer, :pointer], :CK_RV
