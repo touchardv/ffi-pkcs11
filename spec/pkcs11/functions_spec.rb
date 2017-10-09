@@ -161,9 +161,10 @@ describe Pkcs11 do
       end
 
       describe '.C_Logout' do
-        it 'returns CKR_USER_NOT_LOGGED_IN' do
+        it 'returns CKR_OK' do
           result = Pkcs11::C_Logout(session_handle)
-          expect(result).to eq Pkcs11::CKR_USER_NOT_LOGGED_IN
+          expect(result).to eq Pkcs11::CKR_OK
+
         end
       end
 
