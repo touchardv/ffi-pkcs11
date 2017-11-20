@@ -12,6 +12,7 @@ module Pkcs11
   import_function :C_Initialize, [:pointer], :CK_RV
   import_function :C_Finalize, [:pointer], :CK_RV
 
+  import_function :C_GetInfo, [:pointer], :CK_RV
   import_function :C_GetSlotList, [:bool, :pointer, :pointer], :CK_RV
 
   import_function :C_GetSessionInfo, [:ulong, :pointer], :CK_RV

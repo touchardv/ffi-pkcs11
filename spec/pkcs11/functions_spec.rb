@@ -55,6 +55,14 @@ describe Pkcs11 do
       expect(result).to eq Pkcs11::CKR_OK
     end
 
+    describe '.C_GetInfo' do
+      it 'returns CKR_OK' do
+        info_pointer = Pkcs11::CK_INFO.new
+        result = Pkcs11.C_GetInfo(info_pointer)
+        expect(result).to eq Pkcs11::CKR_OK
+      end
+    end
+
     describe '.C_GetSlotList' do
       it 'returns CKR_OK' do
         count_pointer = FFI::MemoryPointer.new(:ulong)

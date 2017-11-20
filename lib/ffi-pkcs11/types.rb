@@ -16,6 +16,14 @@ module Pkcs11
   CKU_USER = 1
   CKU_CONTEXT_SPECIFIC = 2
 
+  class CK_INFO < FFI::Struct
+    layout :cryptoki_version, [:uchar, 2],
+      :manufacturer_id, [:uchar, 32],
+      :flags, :ulong,
+      :library_description, [:uchar, 32],
+      :library_version, [:uchar, 2]
+  end
+
   class CK_SESSION_INFO < FFI::Struct
     layout :slot_id, :ulong,
       :state, :ulong,
