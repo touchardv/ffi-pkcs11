@@ -1,17 +1,12 @@
 require 'spec_helper'
 
 describe Pkcs11 do
-  before(:all) do
-    # brew install softhsm
-    `rm -rf /usr/local/var/lib/softhsm/tokens/*`
-    `softhsm2-util --init-token --slot 0 --id 0x00  --label 'zero' --pin 1234 --so-pin 5678`
-  end
+  include_context 'HSM'
 
   let(:session_handle_pointer) { FFI::MemoryPointer.new(:ulong) }
   let(:session_handle) { session_handle_pointer.read_ulong }
   let(:session_flags) { Pkcs11::CKF_RW_SESSION | Pkcs11::CKF_SERIAL_SESSION }
   let(:invalid_pin) { '6666' }
-  let(:pin) { '1234' }
   let(:so_pin) { '5678' }
   let(:data) { 'ABCDEFGH' }
   let(:md5_data) { '4783e784b4fa2fba9e4d6502dbc64f8f' }
@@ -78,16 +73,6 @@ describe Pkcs11 do
         expect(result).to eq Pkcs11::CKR_OK
         expect(count_pointer.read_ulong).to eq 2
       end
-    end
-
-    let(:valid_slot) do
-      count_pointer = FFI::MemoryPointer.new(:ulong)
-      result = Pkcs11.C_GetSlotList(false, nil, count_pointer)
-      expect(result).to eq Pkcs11::CKR_OK
-      slot_ids_pointer = FFI::MemoryPointer.new(:ulong, count_pointer.read_ulong)
-      result = Pkcs11.C_GetSlotList(false, slot_ids_pointer, count_pointer)
-      expect(result).to eq Pkcs11::CKR_OK
-      slot_ids_pointer[0].read_ulong
     end
 
     describe '.C_OpenSession' do

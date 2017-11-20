@@ -1,24 +1,9 @@
 require 'spec_helper'
 
 describe Pkcs11::Session do
-  before(:all) do
-    # brew install softhsm
-    `rm -rf /usr/local/var/lib/softhsm/tokens/*`
-    `softhsm2-util --init-token --slot 0 --id 0x00  --label 'zero' --pin 1234 --so-pin 5678`
-  end
+  include_context 'HSM'
 
   let(:session) { Pkcs11::Session.new }
-  let(:pin) { '1234' }
-
-  let(:valid_slot) do
-    count_pointer = FFI::MemoryPointer.new(:ulong)
-    result = Pkcs11.C_GetSlotList(false, nil, count_pointer)
-    expect(result).to eq Pkcs11::CKR_OK
-    slot_ids_pointer = FFI::MemoryPointer.new(:ulong, count_pointer.read_ulong)
-    result = Pkcs11.C_GetSlotList(false, slot_ids_pointer, count_pointer)
-    expect(result).to eq Pkcs11::CKR_OK
-    slot_ids_pointer[0].read_ulong
-  end
 
   before(:all) do
     result = Pkcs11.C_Initialize(nil)
