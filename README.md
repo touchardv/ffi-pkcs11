@@ -32,7 +32,18 @@ if result == Pkcs11::CKR_OK
 
 ### High-level API
 
-Coming soon (TM).
+```ruby
+session = Pkcs11::Session.new
+session.open(slot_id) do |_|
+  session.login(pin) do |_|
+    return_value = Pkcs11::C_Digest(session.session_handle,
+                                    some_data,
+                                    some_data_size,
+                                    digest_data,
+                                    digest_data_length)
+    if return_value.ok?
+    [...]
+```
 
 ## Development
 
