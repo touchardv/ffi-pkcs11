@@ -53,6 +53,17 @@ describe Pkcs11::Session do
     end
   end
 
+  describe '#info' do
+    before { session.open(valid_slot) }
+    after { session.close }
+
+    it 'returns a Hash with data' do
+      data = session.info
+      expect(data).to be_a Hash
+      expect(data.keys).to match([:slot_id, :state, :flags, :u_device_error])
+    end
+  end
+
   describe '#login' do
     before { session.open(valid_slot) }
     after { session.close }

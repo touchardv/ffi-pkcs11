@@ -16,6 +16,18 @@ module Pkcs11
       @session_pointer.read_ulong == 0
     end
 
+    def info
+      session_info = Pkcs11::CK_SESSION_INFO.new
+      result = Pkcs11::C_GetSessionInfo(session_handle, session_info)
+      check result
+      {
+        slot_id: session_info[:slot_id],
+        state: session_info[:state],
+        flags: session_info[:flags],
+        u_device_error: session_info[:u_device_error]
+      }
+    end
+
     def login(pin)
       result = Pkcs11.C_Login(session_handle, Pkcs11::CKU_USER, pin, pin.size)
       check result
