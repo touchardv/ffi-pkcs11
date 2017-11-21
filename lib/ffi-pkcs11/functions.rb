@@ -4,8 +4,19 @@ module Pkcs11
     attach_function(function_symbol, function_name, *args)
 
     self.class.send(:define_method, function_name) do |*arguments|
-      result = send(function_symbol, *arguments)
-      ReturnValue[result]
+      if ENV['PKCS11_DEBUG']
+        start_time = Time.now
+        begin
+          result = send(function_symbol, *arguments)
+        ensure
+          end_time = Time.now
+          puts "#{function_name} - #{result} - #{end_time - start_time}"
+        end
+        ReturnValue[result]
+      else
+        result = send(function_symbol, *arguments)
+        ReturnValue[result]
+      end
     end
   end
 
