@@ -83,6 +83,14 @@ describe Pkcs11 do
       end
     end
 
+    describe '.C_GetTokenInfo' do
+      it 'returns CKR_OK' do
+        token_info_pointer = Pkcs11::CK_TOKEN_INFO.new
+        result = Pkcs11.C_GetTokenInfo(valid_slot, token_info_pointer)
+        expect(result).to eq Pkcs11::CKR_OK
+      end
+    end
+
     describe '.C_OpenSession' do
       it 'returns CKR_OK' do
         result = Pkcs11.C_OpenSession(valid_slot,
@@ -133,7 +141,7 @@ describe Pkcs11 do
         it 'returns the session information' do
           Pkcs11::C_GetSessionInfo(session_handle, session_info)
           expect(session_info[:slot_id]).to eq valid_slot
-          expect(session_info[:flags]).to eq session_flags
+          expect(session_info[:flags] && session_flags).to eq session_flags
           expect(session_info[:state]).to eq Pkcs11::CKS_RW_PUBLIC_SESSION
         end
       end

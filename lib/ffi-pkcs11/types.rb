@@ -43,4 +43,25 @@ module Pkcs11
       :value, :pointer,
       :value_len, :ulong
   end
+
+  class CK_TOKEN_INFO < FFI::Struct
+    layout :label, [:uchar, 32],
+      :manufacturer_id, [:uchar, 32],
+      :model, [:uchar, 16],
+      :serial_number, [:char, 16],
+      :flags, :ulong,
+      :u_max_session_count, :ulong,
+      :u_session_count, :ulong,
+      :u_max_rw_session_count, :ulong,
+      :u_rw_session_count, :ulong,
+      :u_max_pin_len, :ulong,
+      :u_min_pin_len, :ulong,
+      :u_total_public_memory, :ulong,
+      :u_free_public_memory, :ulong,
+      :u_total_private_memory, :ulong,
+      :u_free_private_memory, :ulong,
+      :hardware_version, [:char, 2],
+      :firmware_version, [:char, 2],
+      :utc_time, [:char, 16]
+  end
 end
